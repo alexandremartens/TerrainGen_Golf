@@ -19,7 +19,6 @@ public class PhysicEngine {
     static final float DRAGCOEFFICIENT = 0.4f;
     //assumed temperature 20C, sealevel [kg/m^3]
     static final float AIRDENSITY = 1.2041f;
-    //static final float BALLWEIGHT = Settings.getBallWeight()/1000;
 
 
     public static float getSpeed(Vector2 velocity){

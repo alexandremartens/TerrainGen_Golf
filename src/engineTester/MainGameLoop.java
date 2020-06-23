@@ -1,5 +1,6 @@
 package engineTester;
 
+import com.badlogic.gdx.math.Vector2;
 import entities.Camera;
 import entities.Entity;
 import entities.Light;
@@ -60,6 +61,9 @@ public class MainGameLoop {
 
 		Player player = new Player(standfordBall, new Vector3f(300.38553f, 0, -188f),0,0,0,0.1f); // 300,0,-200
 		Camera camera = new Camera(player);
+
+		player.setVeloVector(new Vector2(0.1f,0.1f));
+		player.setCurrentSpeed((float) Math.sqrt(Math.pow(player.getVeloVector().x, 2) + Math.pow(player.getVeloVector().y, 2)));
 
 		while(!Display.isCloseRequested()){
 			camera.move();

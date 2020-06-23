@@ -7,19 +7,20 @@ import org.lwjgl.util.vector.Vector3f;
 import renderEngine.DisplayManager;
 import terrains.Terrain;
 import toolbox.EulerMethod;
+import toolbox.PhysicEngine;
+
+import static org.lwjgl.opengl.GL11.*;
 
 public class Player extends Entity{
 
     private static final float RUN_SPEED = 20;
     private static final float TURN_SPEED = 160;
     private static final float GRAVITY = -50;
-    private static final float JUMP_POWER = 30;
+    private static final float JUMP_POWER = 17;
 
+    private static Vector2 veloVector;
 
-    private static Vector2 veloVector = new Vector2(5,5);
-
-
-    private float currentSpeed = 5;
+    private float currentSpeed = 0;
     private float currentTurnSpeed = 0;
     private float upwardSpeed = 0;
 
@@ -27,11 +28,11 @@ public class Player extends Entity{
 
     public Player(TexturedModel model, Vector3f position, float rotX, float rotY, float rotZ, float scale) {
         super(model, position, rotX, rotY, rotZ, scale);
-        this.setCurrentSpeed(5f);
     }
 
     public void move(Terrain terrain){
         checkInputs();
+
         super.increaseRotation(0, currentTurnSpeed*DisplayManager.getFrameTimeSeconds(),0);
 
         float distance = currentSpeed*DisplayManager.getFrameTimeSeconds();
@@ -44,6 +45,7 @@ public class Player extends Entity{
         super.increasePosition(0, upwardSpeed*DisplayManager.getFrameTimeSeconds(), 0);
 
         float terrainHeight = terrain.getHeightOfTerrain(super.getPosition().x, super.getPosition().z);
+
         //TODO collisionshit is here
         if (super.getPosition().y < terrainHeight){
             upwardSpeed = 0;
@@ -52,26 +54,22 @@ public class Player extends Entity{
         }
     }
 
-    public void updateBall(){
+    public void updateBall() {
+        if (currentSpeed > PhysicEngine.getENDINGSPEED()) { // while speed is less than 0the ending speed
+            Vector2 pos = new Vector2(getPosition().x, getPosition().z);
+            Vector2 velo = new Vector2(getVeloVector().x, getVeloVector().y);
 
+            Vector2 newVelo = EulerMethod.newVelocity(pos, velo);
+            setVeloVector(newVelo);
 
-        System.out.println(currentSpeed);
-        Vector2 pos = new Vector2(getPosition().x,getPosition().z);
-        Vector2 velo = new Vector2(getVeloVector().x, getVeloVector().y);
+            Vector2 newPos = EulerMethod.newPosition(new Vector2(getPosition().x, getPosition().z), new Vector2(getVeloVector().x, getVeloVector().y));
+            setPosition(new Vector3f(newPos.x, 0, newPos.y));
 
-        Vector2 newVelo = EulerMethod.newVelocity(pos, velo);
-        setVeloVector(newVelo);
+            float newVelocity = (float) Math.sqrt(Math.pow(newVelo.x, 2) + Math.pow(newVelo.y, 2));
+            setCurrentSpeed(newVelocity);
 
-        Vector2 newPos = EulerMethod.newPosition(new Vector2(getPosition().x, getPosition().z), new Vector2(getVeloVector().x, getVeloVector().y));
-        setPosition(new Vector3f(newPos.x,0,newPos.y));
-
-        float newVelocity = (float) Math.sqrt(Math.pow(newVelo.x, 2)+Math.pow(newVelo.y, 2));
-        setCurrentSpeed(newVelocity);
-
-        //entities.ball.moveBall(newPos.x, newPos.y);
-
-
-        //System.out.println(getPosition());
+            System.out.println(currentSpeed);
+        }
     }
 
 
@@ -104,8 +102,10 @@ public class Player extends Entity{
         }
 
         if (Keyboard.isKeyDown(Keyboard.KEY_DOWN)){
+
             System.out.println("currentSpeed = " + currentSpeed);
-            updateBall();
+
+            //updateBall();
             //super.setPosition(new Vector3f(200,100,-100));
         }
     }
